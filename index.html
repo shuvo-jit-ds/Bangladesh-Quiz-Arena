@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#053f2d">
+<title>Bangladesh Quiz Arena</title>
+<style>
+:root{
+  --bg:#edf3ee; --card:#ffffff; --ink:#0e2a1f; --muted:#5a6f64; --line:#dbe5de; --soft:#f3f7f4;
+  --brand:#0a7a55; --brand2:#12a672; --deep:#053f2d; --brand-soft:#e1f3ea;
+  --red:#e5412b; --red-soft:#fde8e3; --gold:#f0ae1a; --gold-deep:#9a6700; --gold-soft:#fff3d1;
+  --ok:#16a34a; --ok-soft:#dcfce7; --bad:#dc3d2d; --bad-soft:#fee4e0; --blue:#2f6fed;
+  --shadow:0 1px 2px rgba(14,42,31,.05),0 8px 24px rgba(14,42,31,.07);
+  --shadow-lg:0 2px 4px rgba(14,42,31,.06),0 18px 40px rgba(14,42,31,.12);
+  --r:20px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0b1511; --card:#14211b; --ink:#e9f2ed; --muted:#9bb2a6; --line:#25372e; --soft:#0f1b16;
+    --brand:#2fbf8a; --brand2:#3ad49c; --deep:#06241a; --brand-soft:#17382a;
+    --red:#ff7a63; --red-soft:#3a1c17; --gold:#f3bb3a; --gold-deep:#f3bb3a; --gold-soft:#372c10;
+    --ok:#4cd187; --ok-soft:#14331f; --bad:#ff7d6b; --bad-soft:#3a1d19; --blue:#7aa2ff;
+    --shadow:none; --shadow-lg:0 18px 40px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:radial-gradient(900px 420px at 90% -80px,rgba(18,166,114,.16),transparent),
+             radial-gradient(700px 380px at -10% 30%,rgba(229,65,43,.06),transparent),var(--bg);
+  background-attachment:fixed;
+  color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;line-height:1.2;letter-spacing:-.01em}
+h2{font-size:1.35rem;font-weight:800}
+h3{font-size:1.05rem;font-weight:750}
+p{margin:0}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+.wrap{max-width:1020px;margin:0 auto;padding:0 18px}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ---------- header + nav ---------- */
+.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:12px;height:62px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:850;font-size:1.08rem;letter-spacing:-.02em}
+.dot{width:30px;height:30px;border-radius:50%;background:var(--brand);position:relative;flex:none;box-shadow:inset 0 -3px 6px rgba(0,0,0,.18)}
+.dot::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:var(--red);left:8px;top:8px}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--brand-soft);font-weight:700;font-size:.9rem;white-space:nowrap}
+.chip.gold{background:var(--gold-soft);color:var(--gold-deep)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+.nav{display:flex;gap:4px;margin-left:14px}
+.tab{display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:9px 14px;border-radius:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:background .15s,color .15s}
+.tab:hover{background:var(--soft);color:var(--ink)}
+.tab.on{background:var(--brand);color:#fff}
+main{padding-top:22px;padding-bottom:60px;animation:fade .28s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:760px){
+  .top{backdrop-filter:none;background:var(--card)}   /* a blur filter would trap the fixed bottom menu inside the header */
+  .nav{position:fixed;left:0;right:0;bottom:0;margin:0;gap:0;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:40;justify-content:space-around}
+  .tab{flex-direction:column;gap:2px;font-size:.72rem;padding:6px 10px;flex:1;border-radius:12px}
+  .tab svg.i{width:24px;height:24px}
+  main{padding-bottom:110px}
+  .top .wrap{height:56px}
+}
+
+/* ---------- generic ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.stack{display:grid;gap:18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--card);padding:11px 18px;border-radius:14px;font-weight:700;cursor:pointer;transition:transform .08s,box-shadow .15s,background .15s}
+.btn:hover{box-shadow:var(--shadow)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn.primary{background:linear-gradient(180deg,var(--brand2),var(--brand));border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(10,122,85,.28)}
+.btn.gold{background:linear-gradient(180deg,#ffc83a,var(--gold));border-color:transparent;color:#3a2800}
+.btn.red{background:linear-gradient(180deg,#f0604b,var(--red));border-color:transparent;color:#fff}
+.btn.big{padding:14px 26px;font-size:1.05rem;border-radius:16px}
+.btn.small{padding:7px 13px;font-size:.88rem;border-radius:11px}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+input,select,textarea{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--soft);outline:none;transition:border .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 18%,transparent)}
+textarea{min-height:140px;resize:vertical;font:13px/1.5 ui-monospace,Consolas,monospace}
+label{display:block;font-weight:700;font-size:.88rem;margin:14px 0 6px}
+.badge{display:inline-block;min-width:22px;text-align:center;padding:1px 8px;border-radius:999px;background:var(--red);color:#fff;font-size:.78rem;font-weight:800}
+.grid.wide{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+@media (max-width:420px){.grid.wide{grid-template-columns:1fr}}
+.tag{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:.8rem;font-weight:750;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--brand-soft);font-size:.78rem;font-weight:800}
+.lv-Gold{background:var(--gold-soft);color:var(--gold-deep)}
+.lv-Silver{background:#e6ebef;color:#52606b}
+.lv-Bronze{background:#f6e2d1;color:#97571f}
+@media (prefers-color-scheme:dark){.lv-Silver{background:#2a3138;color:#c3ccd4}.lv-Bronze{background:#3a281a;color:#e8a56d}}
+.sec-title{display:flex;align-items:baseline;gap:10px;margin:6px 2px -4px}
+.sec-title span{color:var(--muted);font-size:.9rem}
+
+/* ---------- login ---------- */
+.login-page{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.login-hero{background:linear-gradient(140deg,var(--deep),var(--brand) 65%,#13b07a);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:center;gap:22px;position:relative;overflow:hidden}
+.login-hero::after{content:"";position:absolute;right:-90px;bottom:-90px;width:330px;height:330px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a70,var(--red));opacity:.92}
+.login-hero>*{position:relative;z-index:1}
+.login-hero h1{font-size:2.4rem;font-weight:900;letter-spacing:-.03em}
+.login-hero ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.login-hero li{display:flex;gap:10px;align-items:center;font-weight:600;opacity:.95}
+.login-hero li b{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.16)}
+.login-form{display:grid;place-items:center;padding:28px}
+.login-form .card{width:100%;max-width:420px;padding:26px}
+@media (max-width:820px){.login-page{grid-template-columns:1fr}.login-hero{padding:28px 22px 60px}.login-hero h1{font-size:1.8rem}.login-form{margin-top:-40px}}
+
+/* ---------- hero (play tab) ---------- */
+.hero{position:relative;overflow:hidden;border-radius:26px;padding:26px;color:#fff;background:linear-gradient(135deg,var(--deep),var(--brand) 62%,#13b07a);box-shadow:var(--shadow-lg)}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a70,var(--red));opacity:.9}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:1.7rem;font-weight:900;letter-spacing:-.025em}
+.hero .sub{opacity:.88;margin-top:4px}
+.week{display:flex;gap:8px;margin:18px 0 4px;align-items:center;flex-wrap:wrap}
+.week i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);font-style:normal;font-size:.8rem;font-weight:800}
+.week i.on{background:var(--gold);color:#3a2800;box-shadow:0 0 0 3px rgba(240,174,26,.35)}
+.week i.reward{background:transparent;border:2px dashed rgba(255,255,255,.55)}
+.week i.reward.on{border:0;background:var(--gold)}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.mini div{background:rgba(255,255,255,.13);border-radius:16px;padding:10px 12px;backdrop-filter:blur(4px)}
+.mini small{display:block;opacity:.8;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.mini b{font-size:1.3rem;font-weight:850}
+@media (max-width:560px){.mini{grid-template-columns:repeat(2,1fr)}.hero{padding:20px}.hero h1{font-size:1.4rem}}
+.banner{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:16px;background:linear-gradient(90deg,var(--gold-soft),transparent);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);font-weight:700;color:var(--gold-deep)}
+
+/* mode cards */
+.mode{display:flex;flex-direction:column;gap:12px;transition:transform .15s,box-shadow .15s}
+.mode:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.mode .head{display:flex;gap:14px;align-items:center}
+.ico{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:25px;background:var(--tile,var(--brand-soft));flex:none}
+.mode p{color:var(--muted);font-size:.93rem}
+.mode .foot{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.feature{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(120deg,var(--card),var(--brand-soft))}
+.feature .big-ico{font-size:46px}
+@media (max-width:560px){.feature{flex-direction:column;align-items:flex-start}}
+
+/* ---------- quiz ---------- */
+.qwrap{max-width:760px;margin:0 auto}
+.qcard{padding:22px;border-radius:26px;box-shadow:var(--shadow-lg)}
+.qtop{display:flex;align-items:center;gap:12px}
+.segs{display:flex;gap:6px;margin:16px 0 4px}
+.segs i{flex:1;height:8px;border-radius:99px;background:var(--line);transition:background .25s}
+.segs i.cur{background:color-mix(in srgb,var(--brand) 45%,var(--line))}
+.segs i.ok{background:var(--ok)}
+.segs i.no{background:var(--bad)}
+.timer{position:relative;width:54px;height:54px;flex:none}
+.timer svg{transform:rotate(-90deg)}
+.timer circle{fill:none;stroke-width:5}
+.timer .bg{stroke:var(--line)}
+.timer .fg{stroke:var(--brand);stroke-linecap:round;transition:stroke .3s}
+.timer.warn .fg{stroke:var(--gold)}
+.timer.danger .fg{stroke:var(--bad)}
+.timer b{position:absolute;inset:0;display:grid;place-items:center;font-weight:850;font-size:1.05rem}
+.timer.danger{animation:pulse .6s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.qtext{font-size:1.5rem;font-weight:800;letter-spacing:-.015em;margin:18px 0 22px;line-height:1.3}
+.opts{display:grid;gap:12px}
+.opt{position:relative;display:flex;gap:14px;align-items:center;text-align:left;width:100%;padding:15px 16px;border-radius:18px;border:2px solid var(--line);background:var(--card);cursor:pointer;font-weight:650;font-size:1.02rem;transition:transform .12s,border-color .15s,background .15s,box-shadow .15s}
+.opt b{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--soft);font-size:.92rem;font-weight:850;transition:all .15s}
+.opt:hover:not(:disabled){border-color:var(--brand);transform:translateX(3px);box-shadow:var(--shadow)}
+.opt:hover:not(:disabled) b{background:var(--brand);color:#fff}
+.opt:disabled{cursor:default}
+.opt.correct{border-color:var(--ok);background:var(--ok-soft);animation:pop .35s}
+.opt.correct b{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);animation:shake .4s}
+.opt.wrong b{background:var(--bad);color:#fff}
+.opt.dim{opacity:.55}
+@keyframes pop{50%{transform:scale(1.025)}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.float{position:absolute;right:18px;top:-6px;font-weight:900;font-size:1.3rem;color:var(--ok);animation:up 1s ease forwards;pointer-events:none}
+@keyframes up{to{transform:translateY(-34px);opacity:0}}
+.combo{display:inline-flex;gap:6px;align-items:center;padding:5px 12px;border-radius:99px;background:var(--red-soft);color:var(--red);font-weight:800;font-size:.85rem;animation:pop .4s}
+.feedback{min-height:28px;margin-top:14px;font-weight:750}
+.feedback.ok{color:var(--ok)}.feedback.no{color:var(--bad)}
+kbd{font:700 .72rem ui-monospace,Consolas,monospace;padding:2px 7px;border-radius:7px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+
+/* ---------- result ---------- */
+.result{max-width:640px;margin:0 auto;text-align:center;padding:28px 22px;border-radius:28px;box-shadow:var(--shadow-lg)}
+.ring{--p:0;width:164px;height:164px;border-radius:50%;margin:10px auto 6px;display:grid;place-items:center;background:conic-gradient(var(--rc,var(--ok)) calc(var(--p)*1%),var(--line) 0)}
+.ring div{width:132px;height:132px;border-radius:50%;background:var(--card);display:grid;place-items:center;align-content:center}
+.ring b{font-size:2.4rem;font-weight:900;line-height:1}
+.ring small{color:var(--muted);font-weight:700}
+.stars{font-size:2rem;letter-spacing:6px;margin:6px 0}
+.stars .off{opacity:.2;filter:grayscale(1)}
+.dots{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--ok)}
+.dots i.no{background:var(--bad)}
+.ach{display:flex;gap:12px;align-items:center;text-align:left;padding:12px 14px;border-radius:16px;background:var(--brand-soft);font-weight:700}
+.ach .e{font-size:1.5rem}
+.ticket{position:relative;margin:4px auto;max-width:420px;padding:16px 20px;border-radius:18px;background:linear-gradient(135deg,var(--gold-soft),var(--card));border:2px dashed var(--gold);text-align:center}
+.ticket small{display:block;color:var(--gold-deep);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem}
+.ticket code{font:900 1.7rem ui-monospace,Consolas,monospace;letter-spacing:3px;color:var(--gold-deep)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:80}
+
+/* ---------- compete ---------- */
+.podium{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:10px;align-items:end;margin-top:14px}
+.pod{border-radius:18px 18px 8px 8px;padding:12px 8px;text-align:center;background:var(--soft);border:1px solid var(--line)}
+.pod .m{font-size:1.8rem}
+.pod b{display:block;font-size:.95rem;word-break:break-word}
+.pod span{font-weight:850;font-size:1.15rem}
+.pod.p1{min-height:150px;background:linear-gradient(180deg,var(--gold-soft),var(--card));border-color:color-mix(in srgb,var(--gold) 55%,var(--line))}
+.pod.p2{min-height:118px}.pod.p3{min-height:96px}
+.pod.empty{opacity:.5}
+.rank{display:grid;grid-template-columns:34px 1fr 62px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rank:last-child{border:0}
+.rank .n{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:850;background:var(--soft)}
+.rank.first .n{background:var(--gold);color:#3a2800}
+.rank .bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.rank .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.rank.first .bar i{background:linear-gradient(90deg,#ffc83a,var(--gold))}
+.rank .pts{text-align:right;font-weight:850}
+.you{font-size:.7rem;font-weight:850;background:var(--red);color:#fff;border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.passport{background:linear-gradient(160deg,#0d4f3a,#083828);color:#fff;border-radius:22px;padding:22px;position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
+.passport::before{content:"";position:absolute;inset:10px;border:1.5px solid rgba(240,174,26,.55);border-radius:16px;pointer-events:none}
+.passport h3{letter-spacing:.14em;text-transform:uppercase;font-size:.9rem;color:var(--gold)}
+.pass-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px;margin-top:18px}
+.stamp{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;font-weight:800;font-size:.78rem;padding:8px;border:2px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.55)}
+.stamp.got{border:3px double #ff8a70;color:#ff8a70;background:rgba(255,138,112,.08);transform:rotate(var(--rot,-8deg));animation:stampin .5s both;text-transform:uppercase;letter-spacing:.05em}
+.stamp.got:nth-child(2n){border-color:#7fd1ff;color:#7fd1ff;background:rgba(127,209,255,.08)}
+@keyframes stampin{from{transform:scale(1.8) rotate(0);opacity:0}}
+.stamp small{display:block;font-size:1.3rem}
+
+/* ---------- market ---------- */
+.wallet{border-radius:26px;padding:22px;color:#fff;background:linear-gradient(135deg,#0b5a40,var(--brand) 55%,#c98d10);box-shadow:var(--shadow-lg)}
+.wallet .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.wallet .stat div{background:rgba(255,255,255,.14);border-radius:16px;padding:12px 14px}
+.wallet .btn:not(.gold){color:var(--ink)}
+.wallet small{display:block;opacity:.85;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.wallet b{font-size:1.55rem;font-weight:850}
+.prog{height:10px;border-radius:99px;background:rgba(255,255,255,.2);overflow:hidden;margin:14px 0 6px}
+.prog i{display:block;height:100%;border-radius:99px;background:var(--gold)}
+.note{padding:0;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,box-shadow .15s}
+.note:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.cover{height:118px;display:grid;place-items:center;font-size:44px;position:relative;background:
+  repeating-linear-gradient(0deg,transparent 0 22px,rgba(255,255,255,.22) 22px 23px),
+  linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 55%,#000))}
+.cover .price{position:absolute;right:10px;top:10px;background:rgba(255,255,255,.95);color:#3a2800;font-weight:850;font-size:.88rem;padding:4px 11px;border-radius:99px}
+.note .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.note .body b{font-size:1rem}
+.drop{display:grid;place-items:center;text-align:center;gap:6px;border:2px dashed var(--line);border-radius:18px;background:var(--soft);padding:22px;cursor:pointer;transition:border .15s,background .15s;min-height:170px}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-soft)}
+.drop img{max-width:100%;max-height:220px;border-radius:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chips button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:4px 12px;font-weight:700;cursor:pointer}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+
+/* ---------- me ---------- */
+.profile-head{border-radius:26px;padding:24px;color:#fff;display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,var(--deep),var(--brand));box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.profile-head::after{content:"";position:absolute;right:-50px;bottom:-70px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8a70,var(--red));opacity:.85}
+.profile-head>*{position:relative;z-index:1}
+.avatar{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:1.9rem;font-weight:900;background:linear-gradient(135deg,#ffc83a,#f0ae1a);color:#3a2800;border:3px solid rgba(255,255,255,.7)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat-grid div{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat-grid small{display:block;color:var(--muted);font-weight:700;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em}
+.stat-grid b{font-size:1.5rem;font-weight:850}
+details.card summary{cursor:pointer;font-weight:800;list-style:none}
+details.card summary::-webkit-details-marker{display:none}
+
+/* ---------- admin ---------- */
+.drop.admin{min-height:140px}
+table.q{width:100%;border-collapse:collapse;font-size:.9rem}
+table.q th{text-align:left;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line)}
+table.q td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.q tr:hover td{background:var(--soft)}
+.opt-mini{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;color:var(--muted);font-size:.84rem;margin-top:4px}
+.opt-mini .r{color:var(--ok);font-weight:800}
+.report{padding:14px 16px;border-radius:16px;background:var(--brand-soft);font-weight:650}
+.report.err{background:var(--bad-soft)}
+.report ul{margin:8px 0 0;padding-left:20px;font-weight:500;font-size:.9rem}
+.scroll-x{overflow-x:auto}
+
+/* ---------- modal + toast ---------- */
+.modal{position:fixed;inset:0;background:rgba(5,20,14,.62);backdrop-filter:blur(3px);display:grid;place-items:center;padding:16px;z-index:70;animation:fade .2s}
+.modal .box{background:var(--card);border-radius:22px;padding:20px;max-width:780px;width:100%;max-height:92vh;overflow:auto;box-shadow:var(--shadow-lg)}
+.modal img.note-img{width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--line)}
+#toasts{position:fixed;left:0;right:0;top:72px;display:grid;gap:8px;justify-items:center;z-index:90;pointer-events:none;padding:0 12px}
+.toast{background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:14px;font-weight:700;max-width:540px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:fade .25s}
+.toast.bad{background:var(--bad);color:#fff}.toast.good{background:var(--ok);color:#fff}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login-page hidden">
+  <section class="login-hero">
+    <div class="logo" style="font-size:1.2rem"><span class="dot"></span> Bangladesh Quiz Arena</div>
+    <h1>Play. Compete.<br>Learn. Earn.</h1>
+    <ul>
+      <li><b>🎯</b> Timed quizzes in Physics, Math, General Knowledge and Bangladesh</li>
+      <li><b>🏆</b> District War &amp; School/College Championship</li>
+      <li><b>📅</b> Exam Countdown missions and a Wrong Answer Notebook</li>
+      <li><b>📝</b> Sell your handwritten notes and earn coins</li>
+    </ul>
+  </section>
+  <section class="login-form">
+    <div class="card">
+      <h2>Let's get started</h2>
+      <p class="muted" id="loginHint" style="margin-top:4px">Enter your name. Returning player? Type the same name again.</p>
+      <label for="inName">Your name</label>
+      <input id="inName" maxlength="24" placeholder="e.g. Rafi" autocomplete="off">
+      <div id="setup" class="hidden">
+        <label for="inDistrict">Your district</label><select id="inDistrict"></select>
+        <label for="inInst">Your school / college</label><select id="inInst"></select>
+      </div>
+      <button class="btn primary big" id="loginBtn" style="width:100%;margin-top:20px">Continue</button>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="wrap">
+      <div class="logo"><span class="dot"></span><span>Quiz Arena</span></div>
+      <nav class="nav" id="nav"></nav>
+      <div class="spacer"></div>
+      <span class="chip red" id="chipStreak" title="Daily streak"></span>
+      <span class="chip gold" id="chipCoins" title="Your coins"></span>
+    </div>
+  </header>
+  <main class="wrap" id="view"></main>
+</div>
+
+<div id="modalHost"></div>
+<div id="toasts"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------
+   This page only DISPLAYS things. Every rule of the game (points,
+   streaks, coupons, marketplace, income, question bank...) is done by
+   the C++ server and requested with api(...)
+------------------------------------------------------------------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const S = { name: null, me: null, meta: null, tab: 'play', quiz: null, adminPin: '', photo: null };
+const TIME = 20;     // seconds per question
+
+/* ---------- icons ---------- */
+const ICONS = {
+  play: '<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>',
+  compete: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  market: '<path d="M5 8h14l-1 12H6zM9 8a3 3 0 0 1 6 0"/>',
+  me: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>'
+};
+const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+
+/* ---------- subject colours ---------- */
+const SUBJ = { Physics:{c:'#2f6fed',e:'⚛️'}, Bangladesh:{c:'#0a8f5f',e:'🏞️'}, General:{c:'#f08a24',e:'🌍'}, Math:{c:'#8b5cf6',e:'➗'},
+  Sponsor:{c:'#d99a0b',e:'🎁'}, Chemistry:{c:'#e0457b',e:'🧪'}, Biology:{c:'#16a34a',e:'🧬'}, English:{c:'#0ea5b7',e:'📖'}, ICT:{c:'#475569',e:'💻'} };
+function subj(s) {
+  if (SUBJ[s]) return SUBJ[s];
+  let h = 0; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  return { c: `hsl(${h} 58% 45%)`, e: '📚' };
+}
+const tag = s => `<span class="tag" style="--c:${subj(s).c}">${subj(s).e} ${esc(s)}</span>`;
+
+/* ---------- helpers ---------- */
+async function api(path, params = {}, post = true) {
+  const p = Object.assign({ name: S.name || '' }, params);
+  try {
+    const res = post ? await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(p) })
+                     : await fetch(path + '?' + new URLSearchParams(p));
+    return await res.json();
+  } catch (e) { return { ok: false, error: 'Cannot reach the C++ server. Is server.exe still running?' }; }
+}
+function toast(msg, kind = '') {
+  const t = document.createElement('div'); t.className = 'toast ' + kind; t.textContent = msg;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), 4200);
+}
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+const view = h => { const v = $('#view'); v.style.animation = 'none'; v.offsetHeight; v.style.animation = ''; v.innerHTML = h; };
+const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
+const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
+
+/* ---------- confetti (small, no library) ---------- */
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  const c = $('#confetti'), x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#0a7a55', '#e5412b', '#f0ae1a', '#12a672', '#2f6fed', '#fff'];
+  const ps = Array.from({ length: 140 }, () => ({ x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35, vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4,
+    s: 5 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[(Math.random() * cols.length) | 0] }));
+  let f = 0;
+  (function tick() {
+    x.clearRect(0, 0, c.width, c.height);
+    ps.forEach(p => { p.vy += .35; p.x += p.vx; p.y += p.vy; p.r += p.vr; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * .6); x.restore(); });
+    if (++f < 150) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height);
+  })();
+}
+
+/* ---------- boot + login ---------- */
+async function boot() {
+  $('#nav').innerHTML = [['play', 'Play'], ['compete', 'Compete'], ['market', 'Market'], ['me', 'Me']]
+    .map(([k, l]) => `<button class="tab" data-tab="${k}">${ic(k)}<span>${l}</span></button>`).join('');
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.tab));
+  S.meta = await api('/api/meta', {}, false);
+  if (!S.meta.ok) { document.body.innerHTML = '<div class="wrap" style="padding-top:40px"><div class="card">' + esc(S.meta.error) + '</div></div>'; return; }
+  $('#inDistrict').innerHTML = S.meta.districts.map((d, i) => `<option value="${i}">${esc(d)}</option>`).join('');
+  $('#inInst').innerHTML = S.meta.institutions.map((d, i) => `<option value="${i}">${esc(d)}</option>`).join('');
+  const saved = store.get('qa_name');
+  if (saved) { $('#inName').value = saved; if (await doLogin(true)) return; }
+  $('#login').classList.remove('hidden');
+}
+async function doLogin(silent) {
+  const name = $('#inName').value.trim();
+  const params = { name };
+  if (!$('#setup').classList.contains('hidden')) { params.district = $('#inDistrict').value; params.institution = $('#inInst').value; }
+  const r = await api('/api/login', params);
+  if (r.needSetup) {
+    $('#setup').classList.remove('hidden');
+    $('#loginHint').textContent = 'Welcome! Choose your district and school/college, then press Continue.';
+    $('#login').classList.remove('hidden'); return false;
+  }
+  if (!r.ok) { if (!silent) toast(r.error, 'bad'); return false; }
+  S.name = r.name; S.me = r; store.set('qa_name', r.name);
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  paintChips(); go(location.hash === '#admin' ? 'admin' : 'play');
+  return true;
+}
+$('#loginBtn').onclick = () => doLogin(false);
+$('#inName').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(false); });
+function paintChips() {
+  $('#chipStreak').textContent = '🔥 ' + S.me.streak + (S.me.shields ? '  🛡 ' + S.me.shields : '');
+  $('#chipCoins').textContent = '🪙 ' + S.me.coins;
+}
+async function refreshMe() { const r = await api('/api/profile', {}, false); if (r.ok) { S.me = r; paintChips(); } }
+
+/* ---------- tabs ---------- */
+async function go(tab) {
+  clearTimer(); S.quiz = null; S.tab = tab; closeModal();
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  await refreshMe();
+  ({ play: viewPlay, compete: viewCompete, market: viewMarket, me: viewMe, admin: viewAdmin })[tab]();
+  window.scrollTo(0, 0);
+}
+
+/* ================= PLAY ================= */
+function viewPlay() {
+  const m = S.me, ex = m.exam, hasExam = ex.name && ex.days > 0;
+  const d = m.streak === 0 ? 0 : ((m.streak - 1) % 7) + 1;
+  const week = [1, 2, 3, 4, 5, 6].map(i => `<i class="${i <= d ? 'on' : ''}">${i}</i>`).join('') + `<i class="reward ${d >= 7 ? 'on' : ''}" title="Day 7 = Streak Shield">🛡</i>`;
+  const acc = pct(m.correctTotal, m.answered);
+  view(`<div class="stack">
+    <section class="hero">
+      <h1>${greet()}, ${esc(m.name)} 👋</h1>
+      <p class="sub">${m.playedToday ? '✅ Streak is safe for today. Keep it going tomorrow!' : 'Play one quiz today to keep your streak alive.'}</p>
+      <div class="week">${week}<span style="margin-left:6px;font-weight:700;opacity:.9">${d >= 7 ? 'Shield earned!' : d === 0 ? 'Start your streak today' : 'Day ' + d + ' of 7'}</span></div>
+      <div class="mini">
+        <div><small>Score</small><b>${m.totalScore}</b></div>
+        <div><small>Streak</small><b>${m.streak} 🔥</b></div>
+        <div><small>Coins</small><b>${m.coins}</b></div>
+        <div><small>Accuracy</small><b>${m.answered ? acc + '%' : '-'}</b></div>
+      </div>
+    </section>
+    ${m.doubleNow ? '<div class="banner"><span style="font-size:1.4rem">⚡</span> Double Point Hour is ON! Every point you earn right now is doubled.</div>'
+                  : '<div class="muted" style="font-size:.9rem;padding:0 4px">💡 Play between 6 PM and 7 PM for double points. 7 days in a row earns a Streak Shield.</div>'}
+    <div class="grid">
+      <div class="card mode feature"><div class="head"><div class="ico" style="--tile:var(--brand-soft)">🎯</div><div><h3>Play Quiz</h3><p>5 random questions from every subject. 10 points for each right answer, ${TIME} seconds per question.</p></div></div>
+        <button class="btn primary big" onclick="startQuiz('normal')">Start quiz</button></div>
+      <div class="card mode"><div class="head"><div class="ico" style="--tile:var(--gold-soft)">🤝</div><h3>Friend Challenge</h3></div>
+        <p>Same 6-digit code gives the same questions. Share your code and compare scores.</p>
+        <div class="foot"><button class="btn primary" onclick="startQuiz('friend')">New code</button></div>
+        <div class="row"><input id="fcode" inputmode="numeric" maxlength="6" placeholder="Friend's code" style="flex:1;min-width:110px"><button class="btn" onclick="joinFriend()">Join</button></div></div>
+      <div class="card mode"><div class="head"><div class="ico" style="--tile:#e3ecff">📅</div><h3>Exam Countdown</h3></div>
+        ${hasExam ? `<p><b>${esc(ex.name)}</b> in <b>${ex.days}</b> days. Today's mission: <b>${ex.count}</b> ${esc(ex.subject)} MCQs.</p>
+          <div class="foot"><button class="btn primary" onclick="startQuiz('exam')">Start mission</button><button class="btn" onclick="viewExamForm()">Change</button></div>`
+        : `<p>Tell us your exam date and get a daily practice mission.</p><div class="foot"><button class="btn primary" onclick="viewExamForm()">Set my exam</button></div>`}</div>
+      <div class="card mode"><div class="head"><div class="ico" style="--tile:var(--red-soft)">📓</div><h3>Wrong Answer Notebook ${m.mistakes ? `<span class="badge">${m.mistakes}</span>` : ''}</h3></div>
+        <p>Every question you miss is saved here. Retry them until the notebook is empty.</p>
+        <div class="foot"><button class="btn primary" ${m.mistakes ? '' : 'disabled'} onclick="startQuiz('retry')">Retry mistakes</button></div></div>
+      <div class="card mode"><div class="head"><div class="ico" style="--tile:var(--gold-soft)">🎁</div><h3>Sponsor Coupon Round</h3></div>
+        <p>3 questions from our sponsor. Get 2 right to win a 10% recharge coupon.</p>
+        <div class="foot"><button class="btn gold" onclick="startQuiz('sponsor')">Play for coupon</button></div></div>
+    </div></div>`);
+}
+function joinFriend() {
+  const c = $('#fcode').value.trim();
+  if (!/^\d{6}$/.test(c)) return toast('Enter a 6-digit code.', 'bad');
+  startQuiz('friend', c);
+}
+function viewExamForm() {
+  const ex = S.me.exam;
+  view(`<div class="card" style="max-width:520px;margin:0 auto"><h2>My exam</h2>
+    <p class="muted" style="margin-top:4px">More than 30 days left: 3 questions a day. 30 days or fewer: 5 questions a day.</p>
+    <label for="exName">Exam name</label><input id="exName" maxlength="30" placeholder="SSC, HSC, Admission..." value="${esc(ex.name)}">
+    <label for="exDays">Days left</label><input id="exDays" type="number" min="1" max="365" value="${ex.days || 30}">
+    <label for="exSub">Subject to practise</label>
+    <select id="exSub">${S.meta.subjects.map(s => `<option ${s === ex.subject ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
+    <div class="row" style="margin-top:20px"><button class="btn primary" onclick="saveExam()">Save</button><button class="btn" onclick="go('play')">Cancel</button></div></div>`);
+}
+async function saveExam() {
+  const r = await api('/api/exam/set', { examName: $('#exName').value, days: $('#exDays').value, subject: $('#exSub').value });
+  if (!r.ok) return toast(r.error, 'bad');
+  toast('Exam saved!', 'good'); go('play');
+}
+
+/* ================= QUIZ ================= */
+function clearTimer() { if (S.quiz && S.quiz.timer) { clearInterval(S.quiz.timer); S.quiz.timer = null; } }
+async function startQuiz(mode, code = '') {
+  const r = await api('/api/quiz/start', { mode, code });
+  if (!r.ok) return toast(r.error, 'bad');
+  r.messages.forEach(m => toast(m, 'good'));
+  S.quiz = Object.assign(r, { i: 0, locked: false, res: [], combo: 0, timer: null });
+  showQuestion();
+}
+function showQuestion() {
+  const z = S.quiz, q = z.questions[z.i], n = z.questions.length;
+  const segs = z.questions.map((_, k) => `<i class="${k < z.res.length ? (z.res[k] ? 'ok' : 'no') : k === z.i ? 'cur' : ''}"></i>`).join('');
+  view(`<div class="qwrap"><div class="card qcard" id="qcard">
+    <div class="qtop">${tag(q.subject)}
+      <span class="muted" style="font-weight:700;white-space:nowrap">Q ${z.i + 1} / ${n}</span>
+      <span class="spacer"></span>
+      ${z.code ? `<span class="chip gold" title="Share this code with a friend">Code ${esc(z.code)}</span>` : ''}
+      <div class="timer" id="timer"><svg width="54" height="54" viewBox="0 0 54 54"><circle class="bg" cx="27" cy="27" r="23"/><circle class="fg" id="ringFg" cx="27" cy="27" r="23" stroke-dasharray="144.5" stroke-dashoffset="0"/></svg><b id="tnum">${TIME}</b></div>
+    </div>
+    <div class="segs">${segs}</div>
+    <div class="qtext">${esc(q.text)}</div>
+    <div class="opts">${q.options.map((o, k) => `<button class="opt" data-k="${k}"><b>${'ABCD'[k]}</b><span>${esc(o)}</span></button>`).join('')}</div>
+    <div class="feedback" id="fb"></div>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <div class="row"><button class="btn primary big hidden" id="nextBtn">${z.i === n - 1 ? 'See result' : 'Next question'} →</button></div>
+      <div class="row"><span class="muted" style="font-size:.82rem">Keys: <kbd>1</kbd>-<kbd>4</kbd> answer · <kbd>Enter</kbd> next</span><button class="btn small ghost" onclick="go('play')">Quit</button></div>
+    </div></div></div>`);
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => pickAnswer(+b.dataset.k));
+  $('#nextBtn').onclick = nextStep;
+  z.locked = false; startTimer();
+}
+function startTimer() {
+  const z = S.quiz; clearTimer(); const t0 = performance.now();
+  z.timer = setInterval(() => {
+    const left = Math.max(0, TIME - (performance.now() - t0) / 1000);
+    const t = $('#timer'); if (!t) return clearTimer();
+    $('#ringFg').style.strokeDashoffset = 144.5 * (1 - left / TIME);
+    $('#tnum').textContent = Math.ceil(left);
+    t.classList.toggle('warn', left <= 10 && left > 5); t.classList.toggle('danger', left <= 5);
+    if (left <= 0) { clearTimer(); pickAnswer(4); }
+  }, 100);
+}
+async function pickAnswer(k) {
+  const z = S.quiz; if (!z || z.locked) return; z.locked = true; clearTimer();
+  const r = await api('/api/quiz/answer', { token: z.token, qi: z.i, choice: k });
+  if (!r.ok) { z.locked = false; toast(r.error, 'bad'); if (/not found/i.test(r.error)) go('play'); return; }
+  const btns = [...document.querySelectorAll('.opt')];
+  btns.forEach(b => b.disabled = true);
+  btns[r.right].classList.add('correct');
+  btns.forEach((b, i) => { if (i !== r.right && i !== k) b.classList.add('dim'); });
+  if (!r.correct && k < 4) btns[k].classList.add('wrong');
+  z.res.push(r.correct); z.combo = r.correct ? z.combo + 1 : 0;
+  const fb = $('#fb');
+  if (r.correct) {
+    fb.className = 'feedback ok'; fb.innerHTML = '✔ Correct!' + (z.combo >= 2 ? ` <span class="combo">🔥 Combo x${z.combo}</span>` : '');
+    const f = document.createElement('div'); f.className = 'float'; f.textContent = '+10'; btns[r.right].appendChild(f);
+  } else { fb.className = 'feedback no'; fb.textContent = k === 4 ? "⏰ Time's up! The right answer is highlighted." : '✘ Not quite. The right answer is highlighted.'; }
+  $('#nextBtn').classList.remove('hidden'); $('#nextBtn').focus();
+}
+function nextStep() {
+  const z = S.quiz; if (!z || !z.locked) return;
+  if (z.i === z.questions.length - 1) finishQuiz(); else { z.i++; showQuestion(); }
+}
+document.addEventListener('keydown', e => {
+  const z = S.quiz; if (!z || !$('#qcard')) return;
+  if (!z.locked && /^[1-4]$/.test(e.key)) pickAnswer(+e.key - 1);
+  else if (!z.locked && /^[a-dA-D]$/.test(e.key)) pickAnswer('abcd'.indexOf(e.key.toLowerCase()));
+  else if (z.locked && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); nextStep(); }
+});
+const ACH = [[/double/i, '⚡'], [/toppers/i, '🥇'], [/stamp/i, '🛂'], [/coupon/i, '🎟️'], [/shield/i, '🛡️'], [/streak/i, '🔥']];
+async function finishQuiz() {
+  const z = S.quiz; clearTimer();
+  const r = await api('/api/quiz/finish', { token: z.token });
+  if (!r.ok) { toast(r.error, 'bad'); return go('play'); }
+  await refreshMe();
+  const p = pct(r.correct, r.total), stars = p >= 80 ? 3 : p >= 50 ? 2 : r.correct > 0 ? 1 : 0;
+  const title = p === 100 ? 'Perfect score! 🎉' : p >= 80 ? 'Excellent work!' : p >= 50 ? 'Good job!' : p > 0 ? 'Keep practising!' : 'Do not give up!';
+  view(`<div class="card result stack">
+    <div><div class="muted" style="font-weight:700">${esc(z.title)}</div><h2 style="font-size:1.7rem;margin-top:4px">${title}</h2></div>
+    <div><div class="ring" style="--p:${p};--rc:${p >= 50 ? 'var(--ok)' : 'var(--gold)'}"><div><b>${r.correct}/${r.total}</b><small>${p}% right</small></div></div>
+    <div class="stars">${[0, 1, 2].map(i => `<span class="${i < stars ? '' : 'off'}">⭐</span>`).join('')}</div>
+    <div class="dots">${r.results.map(x => `<i class="${x.ok ? '' : 'no'}"></i>`).join('')}</div>
+    <div style="font-size:1.25rem;font-weight:850">+${r.points} points <span class="muted" style="font-weight:600;font-size:.95rem">· total ${S.me.totalScore}</span></div></div>
+    ${r.messages.map(m => `<div class="ach"><span class="e">${(ACH.find(a => a[0].test(m)) || [0, '✨'])[1]}</span><span>${esc(m)}</span></div>`).join('')}
+    ${r.coupon ? `<div class="ticket"><small>Sponsor coupon · 10% recharge</small><code>${esc(r.coupon)}</code></div>` : ''}
+    ${z.code ? `<div class="muted">Challenge code <b>${esc(z.code)}</b>: send it to a friend and compare scores.</div>` : ''}
+    <div class="row" style="justify-content:center"><button class="btn primary big" onclick="again()">Play again</button><button class="btn big" onclick="go('compete')">Rankings</button><button class="btn big ghost" onclick="go('play')">Menu</button></div></div>`);
+  if (p >= 80) confetti();
+}
+function again() { const z = S.quiz; if (z.mode === 'friend') go('play'); else startQuiz(z.mode); }
+
+/* ================= COMPETE ================= */
+async function viewCompete() {
+  view('<div class="muted">Loading rankings...</div>');
+  const b = await api('/api/boards', {}, false);
+  if (!b.ok) return toast(b.error, 'bad');
+  const m = S.me;
+  const rows = (list, mine) => { const max = Math.max(1, ...list.map(x => x.pts));
+    return list.map((x, i) => `<div class="rank ${i === 0 && x.pts > 0 ? 'first' : ''}"><span class="n">${i + 1}</span>
+      <div><b>${esc(x.name)}</b>${x.name === mine ? '<span class="you">YOUR TEAM</span>' : ''}<div class="bar"><i style="width:${x.pts / max * 100}%"></i></div></div><span class="pts">${x.pts}</span></div>`).join(''); };
+  const t = b.toppers, med = ['🥇', '🥈', '🥉'];
+  const pod = (i, cls) => t[i] ? `<div class="pod ${cls}"><div class="m">${med[i]}</div><b>${esc(t[i].name)}</b><span>${t[i].score}</span></div>`
+                               : `<div class="pod ${cls} empty"><div class="m">${med[i]}</div><b>-</b></div>`;
+  view(`<div class="stack">
+    <div class="sec-title"><h2>Compete</h2><span>Every point you earn counts for your district and your college.</span></div>
+    <div class="card"><h3>🥇 Beat the Toppers</h3><p class="muted" style="margin-top:4px">The three best rounds ever. Beat the top score for a +5 bonus.</p>
+      <div class="podium">${pod(1, 'p2')}${pod(0, 'p1')}${pod(2, 'p3')}</div></div>
+    <div class="grid wide">
+      <div class="card"><h3>🏆 District vs District War</h3><p class="muted" style="margin-top:4px">Your district: <b>${esc(m.district)}</b></p>${rows(b.districts, m.district)}</div>
+      <div class="card"><h3>🏫 School / College Championship</h3><p class="muted" style="margin-top:4px">Your team: <b>${esc(m.institution)}</b></p>${rows(b.institutions, m.institution)}</div>
+    </div>
+    <div class="passport"><h3>Bangladesh Quiz Passport</h3>
+      <p style="margin-top:6px;opacity:.85">Holder: <b>${esc(m.name)}</b> · win a round with 80% or more right to earn a stamp.</p>
+      <div class="pass-grid">${m.places.map((p, i) => `<div class="stamp ${i < m.stamps ? 'got' : ''}" style="--rot:${[-9, 6, -4, 10, -7][i % 5]}deg">${i < m.stamps ? `<span><small>✔</small>${esc(p)}</span>` : `<span><small>${i + 1}</small>${esc(p)}</span>`}</div>`).join('')}</div>
+      ${m.stamps === m.places.length ? '<p style="margin-top:14px;font-weight:800;color:var(--gold)">Passport complete! You are a Bangladesh Explorer! 🎉</p>' : ''}</div>
+  </div>`);
+}
+
+/* ================= MARKET ================= */
+async function viewMarket() {
+  const m = S.me, l = await api('/api/market/list', {}, false);
+  if (!l.ok) return toast(l.error, 'bad');
+  const others = l.notes.filter(n => !n.mine), mine = l.notes.filter(n => n.mine);
+  const from = m.nextLevelAt === 0 ? 10 : m.nextLevelAt === 1 ? 0 : m.nextLevelAt === 5 ? 1 : 5;
+  const prog = m.nextLevelAt ? Math.min(100, (m.sales - from) / (m.nextLevelAt - from) * 100) : 100;
+  view(`<div class="stack">
+    <section class="wallet">
+      <div class="stat">
+        <div><small>Wallet</small><b>🪙 ${m.coins}</b></div>
+        <div><small>Earnings</small><b>💰 ${m.earned}</b></div>
+        <div><small>Creator level</small><b>${m.level === 'None' ? 'Not yet' : m.level}</b></div>
+        <div><small>Quiz points ready</small><b>${m.pointsAvail}</b></div>
+      </div>
+      <div class="prog"><i style="width:${prog}%"></i></div>
+      <div style="font-size:.85rem;opacity:.92">${m.nextLevelAt ? `${m.sales} of ${m.nextLevelAt} sales to the next level` : 'Top level reached!'} · your platform fee is ${m.fee}% (Bronze 10%, Silver 8%, Gold 5%)</div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn gold" onclick="convert()">Convert points to coins</button>
+        <button class="btn" onclick="withdrawForm()">Withdraw earnings</button>
+      </div>
+    </section>
+    <div class="sec-title"><h2>Notes for sale</h2><span>Spend coins to unlock handwritten notes from other students.</span></div>
+    <div class="grid">${others.map(noteCard).join('') || '<div class="muted">No notes from other students yet.</div>'}</div>
+    <div class="card"><h2>Sell my handwritten note</h2>
+      <p class="muted" style="margin-top:4px">Take a clear photo of your notes, set a price and earn coins every time a classmate buys it.</p>
+      <div class="two">
+        <div>
+          <label for="sTitle">Title</label><input id="sTitle" maxlength="60" placeholder="e.g. Physics Chapter 5 - Heat">
+          <label for="sSub">Subject</label><input id="sSub" maxlength="30" placeholder="e.g. Physics" list="subList">
+          <datalist id="subList">${S.meta.subjects.map(s => `<option value="${esc(s)}">`).join('')}</datalist>
+          <label for="sPrice">Price (coins)</label><input id="sPrice" type="number" min="1" max="500" value="20">
+          <div class="chips">${[10, 20, 30, 50, 100].map(v => `<button type="button" onclick="$('#sPrice').value=${v}">${v}</button>`).join('')}</div>
+        </div>
+        <div><label>Photo of the note</label>
+          <label class="drop" id="drop" for="sFile" style="margin:0"><span id="dropTxt">${ic('upload')}<br><b>Tap to choose a photo</b><br><span class="muted">or drop it here</span></span></label>
+          <input id="sFile" type="file" accept="image/*" class="hidden"></div>
+      </div>
+      <div class="row" style="margin-top:18px"><button class="btn primary big" onclick="sellNote()">Put on sale</button></div></div>
+    <div class="sec-title"><h2>My notes</h2></div>
+    <div class="grid">${mine.map(noteCard).join('') || '<div class="muted">You have not listed any notes yet.</div>'}</div>
+  </div>`);
+  const setPhoto = async f => { if (!f) return; S.photo = await shrink(f); $('#drop').innerHTML = `<img src="${S.photo}" alt="Preview">`; };
+  $('#sFile').onchange = e => setPhoto(e.target.files[0]);
+  const dr = $('#drop');
+  ['dragover', 'dragenter'].forEach(ev => dr.addEventListener(ev, e => { e.preventDefault(); dr.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => dr.addEventListener(ev, e => { e.preventDefault(); dr.classList.remove('over'); }));
+  dr.addEventListener('drop', e => setPhoto(e.dataTransfer.files[0]));
+}
+function noteCard(n) {
+  const s = subj(n.subject);
+  const act = n.mine || n.bought ? `<button class="btn small" onclick="openNote(${n.id})">Open note</button>` : `<button class="btn primary small" onclick="buy(${n.id})">Buy for ${n.price} coins</button>`;
+  return `<div class="card note"><div class="cover" style="--c:${s.c}">${s.e}<span class="price">🪙 ${n.price}</span></div>
+    <div class="body"><div class="row" style="justify-content:space-between">${tag(n.subject)}${n.mine ? '<span class="pill">Yours</span>' : n.bought ? '<span class="pill">✔ Owned</span>' : ''}</div>
+    <b>${esc(n.title)}</b>
+    <div class="muted" style="font-size:.88rem">by ${esc(n.seller)} ${n.sellerLevel !== 'None' ? `<span class="pill lv-${n.sellerLevel}">${n.sellerLevel}</span>` : ''} · sold ${n.sales}</div>
+    <div style="margin-top:auto">${act}</div></div></div>`;
+}
+function shrink(file, max = 1000) {      // make a photo small in the browser before uploading
+  return new Promise(res => {
+    const img = new Image(), rd = new FileReader();
+    rd.onload = () => { img.src = rd.result; };
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.72));
+    };
+    rd.readAsDataURL(file);
+  });
+}
+async function sellNote() {
+  if (!S.photo) return toast('Please choose a photo of your note.', 'bad');
+  const r = await api('/api/market/sell', { title: $('#sTitle').value, subject: $('#sSub').value, price: $('#sPrice').value, image: S.photo });
+  if (!r.ok) return toast(r.error, 'bad');
+  S.photo = null; toast(r.message, 'good'); go('market');
+}
+async function buy(id) { const r = await api('/api/market/buy', { id }); if (!r.ok) return toast(r.error, 'bad'); toast(r.message, 'good'); go('market'); }
+async function openNote(id) {
+  const r = await api('/api/market/view', { id }, false);
+  if (!r.ok) return toast(r.error, 'bad');
+  $('#modalHost').innerHTML = `<div class="modal" onclick="closeModal()"><div class="box" onclick="event.stopPropagation()">
+    <div class="row"><h3>${esc(r.title)}</h3><span class="spacer"></span><button class="btn small" onclick="closeModal()">Close</button></div>
+    <img class="note-img" src="${esc(r.image)}" alt="Note"></div></div>`;
+}
+function closeModal() { $('#modalHost').innerHTML = ''; }
+async function convert() { const r = await api('/api/market/convert'); if (!r.ok) return toast(r.error, 'bad'); toast(r.message, 'good'); go('market'); }
+function withdrawForm() {
+  const m = S.me;
+  $('#modalHost').innerHTML = `<div class="modal" onclick="closeModal()"><div class="box" style="max-width:420px" onclick="event.stopPropagation()">
+    <h3>Withdraw earnings</h3><p class="muted" style="margin-top:4px">You have ${m.earned} withdrawable coins. Minimum 50. (1 coin = 1 taka. Demo only, no real money moves.)</p>
+    <label for="wAmt">Amount</label><input id="wAmt" type="number" min="50" max="${m.earned}" value="${Math.max(50, m.earned)}">
+    <div class="row" style="margin-top:18px"><button class="btn primary" onclick="doWithdraw()">Request withdrawal</button><button class="btn" onclick="closeModal()">Cancel</button></div></div></div>`;
+}
+async function doWithdraw() {
+  const r = await api('/api/market/withdraw', { amount: $('#wAmt').value });
+  if (!r.ok) return toast(r.error, 'bad'); closeModal(); toast(r.message, 'good'); go('market');
+}
+
+/* ================= ME ================= */
+function viewMe() {
+  const m = S.me, acc = pct(m.correctTotal, m.answered);
+  view(`<div class="stack">
+    <section class="profile-head"><div class="avatar">${esc(m.name.charAt(0).toUpperCase())}</div>
+      <div><h2 style="font-size:1.6rem">${esc(m.name)}</h2><p style="opacity:.9;margin-top:2px">${esc(m.district)} · ${esc(m.institution)}</p>
+      <div class="row" style="margin-top:10px"><span class="chip">🔥 ${m.streak}-day streak</span><span class="chip">${m.level === 'None' ? 'No creator level yet' : m.level + ' creator'}</span></div></div></section>
+    <div class="stat-grid">
+      <div><small>Total score</small><b>${m.totalScore}</b></div>
+      <div><small>Best round</small><b>${m.bestScore}</b></div>
+      <div><small>Rounds played</small><b>${m.rounds}</b></div>
+      <div><small>Accuracy</small><b>${m.answered ? acc + '%' : '-'}</b></div>
+      <div><small>Answered</small><b>${m.correctTotal}/${m.answered}</b></div>
+      <div><small>Streak shield</small><b>🛡 ${m.shields}</b></div>
+      <div><small>Passport stamps</small><b>${m.stamps}/${m.places.length}</b></div>
+      <div><small>Lifetime earnings</small><b>🪙 ${m.totalEarned}</b></div>
+    </div>
+    <details class="card"><summary>🧪 Demo tools (to show the teacher)</summary>
+      <p class="muted" style="margin:8px 0 12px">Test features that normally need time to pass.</p>
+      <div class="row">
+        <button class="btn small" onclick="demo('nextday')">Skip to next day</button>
+        <button class="btn small" onclick="demo('double')">Double Point Hour: ${m.doubleDemo ? 'ON' : 'OFF'}</button>
+        <button class="btn small" onclick="demo('sale')">A classmate buys my note</button>
+      </div>
+      <p class="muted" style="font-size:.85rem;margin-top:10px">Skip a day and play: the streak grows. Earn a shield, skip two days, and play: the shield saves your streak.</p></details>
+    <div class="row"><button class="btn" onclick="go('admin')">🔐 Admin: manage questions</button><button class="btn ghost" onclick="logout()">Switch player</button></div>
+  </div>`);
+}
+async function demo(what) { const r = await api('/api/demo/' + what); if (!r.ok) return toast(r.error, 'bad'); toast(r.message, 'good'); go('me'); }
+function logout() { store.set('qa_name', ''); location.hash = ''; location.reload(); }
+
+/* ================= ADMIN ================= */
+async function viewAdmin() {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  if (!S.adminPin) {
+    view(`<div class="card" style="max-width:440px;margin:30px auto"><h2>🔐 Admin</h2>
+      <p class="muted" style="margin-top:4px">Enter the admin PIN to manage the question bank.</p>
+      <label for="pin">Admin PIN</label><input id="pin" type="password" autocomplete="off" placeholder="PIN">
+      <div class="row" style="margin-top:18px"><button class="btn primary" id="pinBtn">Unlock</button><button class="btn ghost" onclick="go('me')">Back</button></div></div>`);
+    const go2 = async () => {
+      const r = await api('/api/admin/login', { pin: $('#pin').value });
+      if (!r.ok) return toast(r.error, 'bad');
+      S.adminPin = $('#pin').value; S.defaultPin = r.defaultPin; viewAdmin();
+    };
+    $('#pinBtn').onclick = go2; $('#pin').addEventListener('keydown', e => { if (e.key === 'Enter') go2(); }); $('#pin').focus();
+    return;
+  }
+  const l = await api('/api/admin/list', { pin: S.adminPin });
+  if (!l.ok) { S.adminPin = ''; toast(l.error, 'bad'); return viewAdmin(); }
+  S.bank = l.questions;
+  view(`<div class="stack">
+    <div class="row"><div><h2>Question bank</h2><p class="muted">Add, import or delete questions. Changes work immediately, no restart needed.</p></div><span class="spacer"></span>
+      <button class="btn small" onclick="downloadBank()">⬇ Download all (CSV)</button><button class="btn small" onclick="S.adminPin='';go('me')">Lock &amp; leave</button></div>
+    ${S.defaultPin ? '<div class="banner">⚠ You are using the default PIN. Create a file named admin_pin.txt next to the server with your own PIN, then restart.</div>' : ''}
+    <div class="row" id="subChips">${chipsHtml(l)}</div>
+
+    <div class="card"><h3>📥 Import questions from Excel, Word or CSV</h3>
+      <p class="muted" style="margin-top:4px">Columns, in this order: <b>Subject, Question, Option 1, Option 2, Option 3, Option 4, Correct (1-4 or A-D)</b>. The first row may be a header. Use the subject name <b>Sponsor</b> for coupon-round questions.</p>
+      <label class="drop admin" id="adrop" for="afile" style="margin-top:14px"><span>${ic('upload')}<br><b>Drop a file here or click to choose</b><br><span class="muted">.xlsx (Excel) · .docx (Word table) · .csv · .txt</span></span></label>
+      <input id="afile" type="file" accept=".xlsx,.xlsm,.docx,.csv,.tsv,.txt" class="hidden">
+      <label for="adata">…or paste rows copied from Excel or Word (you can check and edit them here before importing)</label>
+      <textarea id="adata" placeholder="Physics&#9;SI unit of force?&#9;Joule&#9;Newton&#9;Watt&#9;Pascal&#9;2"></textarea>
+      <div class="muted" id="acount" style="margin-top:6px;font-size:.88rem"></div>
+      <div class="row" style="margin-top:12px">
+        <label style="margin:0;display:flex;gap:8px;align-items:center;font-weight:650"><input type="radio" name="amode" value="append" checked style="width:auto"> Add to existing questions</label>
+        <label style="margin:0;display:flex;gap:8px;align-items:center;font-weight:650"><input type="radio" name="amode" value="replace" style="width:auto"> Replace ALL questions</label>
+      </div>
+      <div class="row" style="margin-top:14px"><button class="btn primary" onclick="doImport()">Import now</button><button class="btn" onclick="downloadTemplate()">⬇ Download template (CSV)</button></div>
+      <div id="areport" style="margin-top:14px"></div></div>
+
+    <div class="card"><h3>➕ Add one question</h3>
+      <div class="two"><div><label for="nSub">Subject</label><input id="nSub" list="subList2" placeholder="Physics"><datalist id="subList2">${subjectOptions(l, 'datalist')}</datalist>
+        <label for="nQ">Question</label><input id="nQ" maxlength="300"></div>
+        <div>${[1, 2, 3, 4].map(i => `<label for="nO${i}">Option ${'ABCD'[i - 1]}</label><input id="nO${i}" maxlength="120">`).join('')}
+        <label for="nC">Correct answer</label><select id="nC"><option value="1">A</option><option value="2">B</option><option value="3">C</option><option value="4">D</option></select></div></div>
+      <div class="row" style="margin-top:16px"><button class="btn primary" onclick="addOne()">Add question</button></div></div>
+
+    <div class="card"><div class="row"><h3>📚 All questions</h3><span class="spacer"></span>
+      <select id="fSub" style="width:auto"><option value="">All subjects</option>${subjectOptions(l, 'select')}</select>
+      <input id="fTxt" placeholder="Search..." style="width:200px"></div>
+      <div class="scroll-x" style="margin-top:12px"><table class="q"><thead><tr><th>Subject</th><th>Question and options</th><th></th></tr></thead><tbody id="qrows"></tbody></table></div>
+      <div class="muted" id="qmore" style="margin-top:10px"></div></div>
+  </div>`);
+  $('#fSub').onchange = $('#fTxt').oninput = renderBank; renderBank();
+  const ta = $('#adata'), upd = () => { const n = ta.value.split('\n').filter(x => x.trim() && !x.trim().startsWith('#')).length; $('#acount').textContent = n ? n + ' row(s) ready to import.' : ''; };
+  ta.oninput = upd;
+  const take = async f => { if (!f) return; try { ta.value = await fileToText(f); upd(); toast('File read. Check the rows, then press Import now.', 'good'); } catch (e) { toast(e.message, 'bad'); } };
+  $('#afile').onchange = e => take(e.target.files[0]);
+  const dr = $('#adrop');
+  ['dragover', 'dragenter'].forEach(ev => dr.addEventListener(ev, e => { e.preventDefault(); dr.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => dr.addEventListener(ev, e => { e.preventDefault(); dr.classList.remove('over'); }));
+  dr.addEventListener('drop', e => take(e.dataTransfer.files[0]));
+}
+const chipsHtml = l => l.subjects.map(s => `<span class="tag" style="--c:${subj(s.subject).c}">${subj(s.subject).e} ${esc(s.subject)} · ${s.count}</span>`).join('') + `<span class="chip">Total ${l.total}</span>`;
+const subjectOptions = (l, kind) => l.subjects.map(s => kind === 'select' ? `<option>${esc(s.subject)}</option>` : `<option value="${esc(s.subject)}">`).join('');
+// update the lists on the admin page without rebuilding the whole page (keeps what you typed)
+async function refreshAdminData() {
+  const l = await api('/api/admin/list', { pin: S.adminPin });
+  if (!l.ok) return;
+  S.bank = l.questions; $('#subChips').innerHTML = chipsHtml(l);
+  const sel = $('#fSub'), cur = sel.value; sel.innerHTML = '<option value="">All subjects</option>' + subjectOptions(l, 'select'); sel.value = cur;
+  $('#subList2').innerHTML = subjectOptions(l, 'datalist'); renderBank();
+  S.meta = await api('/api/meta', {}, false);
+}
+function renderBank() {
+  const sub = $('#fSub').value, t = $('#fTxt').value.toLowerCase();
+  const list = S.bank.filter(q => (!sub || q.subject === sub) && (!t || (q.text + q.options.join(' ')).toLowerCase().includes(t)));
+  $('#qrows').innerHTML = list.slice(0, 150).map(q => `<tr><td style="white-space:nowrap">${tag(q.subject)}</td>
+    <td><b>${esc(q.text)}</b><div class="opt-mini">${q.options.map((o, i) => `<span class="${i + 1 === q.correct ? 'r' : ''}">${'ABCD'[i]}. ${esc(o)}${i + 1 === q.correct ? ' ✔' : ''}</span>`).join('')}</div></td>
+    <td><button class="btn small" onclick="delQ(${q.i})">Delete</button></td></tr>`).join('') || '<tr><td colspan="3" class="muted">No questions match.</td></tr>';
+  $('#qmore').textContent = list.length > 150 ? `Showing the first 150 of ${list.length}. Use the filter to narrow down.` : `${list.length} question(s).`;
+}
+async function doImport() {
+  const data = $('#adata').value; if (!data.trim()) return toast('Choose a file or paste some rows first.', 'bad');
+  const mode = document.querySelector('input[name=amode]:checked').value;
+  if (mode === 'replace' && !confirm('This removes ALL current questions (a backup is saved as questions_backup.txt). Continue?')) return;
+  const r = await api('/api/admin/import', { pin: S.adminPin, data, mode });
+  const box = $('#areport');
+  if (!r.ok) { box.innerHTML = `<div class="report err">❌ ${esc(r.error)}</div>`; return; }
+  box.innerHTML = `<div class="report">✅ <b>${r.added}</b> question(s) added${r.duplicates ? `, ${r.duplicates} duplicate(s) skipped` : ''}${r.invalid ? `, <b>${r.invalid}</b> row(s) had problems` : ''}. Total now: <b>${r.total}</b>.
+    ${r.errors.length ? '<ul>' + r.errors.map(e => `<li>${esc(e)}</li>`).join('') + '</ul>' : ''}</div>`;
+  toast('Questions imported!', 'good');
+  $('#adata').value = ''; $('#acount').textContent = ''; $('#afile').value = '';
+  await refreshAdminData();
+}
+async function addOne() {
+  const r = await api('/api/admin/add', { pin: S.adminPin, subject: $('#nSub').value, text: $('#nQ').value, o1: $('#nO1').value, o2: $('#nO2').value, o3: $('#nO3').value, o4: $('#nO4').value, correct: $('#nC').value });
+  if (!r.ok) return toast(r.error, 'bad');
+  if (!r.added) return toast('That question already exists.', 'bad');
+  toast('Question added!', 'good');
+  ['nQ', 'nO1', 'nO2', 'nO3', 'nO4'].forEach(id => $('#' + id).value = ''); $('#nC').value = '1'; $('#nQ').focus();
+  await refreshAdminData();
+}
+async function delQ(i) {
+  if (!confirm('Delete this question?')) return;
+  const r = await api('/api/admin/delete', { pin: S.adminPin, index: i });
+  if (!r.ok) return toast(r.error, 'bad'); toast('Deleted.', 'good'); await refreshAdminData();
+}
+function download(name, text) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const csvCell = v => '"' + String(v).replace(/"/g, '""') + '"';
+function downloadTemplate() {
+  download('questions_template.csv', ['Subject,Question,Option1,Option2,Option3,Option4,Correct',
+    'Physics,SI unit of force?,Joule,Newton,Watt,Pascal,2', 'Math,12 x 12 = ?,124,144,164,184,2', 'Sponsor,How many days are in a week?,5,6,7,8,3'].join('\r\n'));
+}
+function downloadBank() {
+  download('questions_all.csv', ['Subject,Question,Option1,Option2,Option3,Option4,Correct'].concat(S.bank.map(q => [q.subject, q.text, ...q.options, q.correct].map(csvCell).join(','))).join('\r\n'));
+}
+
+/* ---- read Excel (.xlsx) and Word (.docx) in the browser: both are zip files ---- */
+async function unzip(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  let e = u8.length - 22; while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error('This file is not a valid .xlsx/.docx file.');
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const files = {};
+  for (let i = 0; i < n; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+    files[new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl))] = { method: dv.getUint16(p + 10, true), size: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true) };
+    p += 46 + nl + el + cl;
+  }
+  const read = async name => {
+    const f = files[name]; if (!f) return null;
+    const start = f.off + 30 + dv.getUint16(f.off + 26, true) + dv.getUint16(f.off + 28, true), data = u8.subarray(start, start + f.size);
+    if (f.method === 0) return new TextDecoder().decode(data);
+    if (typeof DecompressionStream === 'undefined') throw new Error('Your browser is too old to read this file. Save it as CSV instead.');
+    return await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+  };
+  return { names: Object.keys(files), read };
+}
+const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+function colIndex(ref) { let n = 0; for (const ch of ref.replace(/[^A-Z]/gi, '').toUpperCase()) n = n * 26 + ch.charCodeAt(0) - 64; return n - 1; }
+async function xlsxRows(buf) {
+  const z = await unzip(buf); let shared = [];
+  const ss = await z.read('xl/sharedStrings.xml');
+  if (ss) shared = [...xml(ss).getElementsByTagName('si')].map(si => [...si.getElementsByTagName('t')].map(t => t.textContent).join(''));
+  const sheets = z.names.filter(n => /^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort((a, b) => parseInt(a.match(/\d+/)) - parseInt(b.match(/\d+/)));
+  if (!sheets.length) throw new Error('No worksheet found in this Excel file.');
+  const rows = [];
+  for (const row of xml(await z.read(sheets[0])).getElementsByTagName('row')) {
+    const arr = [];
+    for (const c of row.getElementsByTagName('c')) {
+      const t = c.getAttribute('t'), v = c.getElementsByTagName('v')[0]; let val = '';
+      if (t === 's') val = v ? (shared[+v.textContent] || '') : '';
+      else if (t === 'inlineStr') val = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
+      else val = v ? v.textContent : '';
+      arr[colIndex(c.getAttribute('r') || 'A1')] = val;
+    }
+    rows.push(Array.from(arr, x => x == null ? '' : x));
+  }
+  return rows;
+}
+async function docxRows(buf) {
+  const z = await unzip(buf), d = xml(await z.read('word/document.xml') || ''), cellText = el => [...el.getElementsByTagName('w:p')].map(p => [...p.getElementsByTagName('w:t')].map(t => t.textContent).join('')).join(' ');
+  const rows = [...d.getElementsByTagName('w:tr')].map(tr => [...tr.getElementsByTagName('w:tc')].map(cellText));
+  if (rows.length) return rows;
+  return [...d.getElementsByTagName('w:p')].map(p => [[...p.getElementsByTagName('w:t')].map(t => t.textContent).join('')]);
+}
+const rowsToText = rows => rows.filter(r => r.some(x => String(x).trim())).map(r => r.map(x => String(x).replace(/\|/g, '/').replace(/[\r\n\t]+/g, ' ').trim()).join('|')).join('\n');
+async function fileToText(f) {
+  const n = f.name.toLowerCase();
+  if (/\.(xlsx|xlsm)$/.test(n)) return rowsToText(await xlsxRows(await f.arrayBuffer()));
+  if (n.endsWith('.docx')) return rowsToText(await docxRows(await f.arrayBuffer()));
+  if (/\.(xls|doc|pdf)$/.test(n)) throw new Error('Old .xls/.doc and PDF files are not supported. Please save it as .xlsx, .docx or CSV first.');
+  return await f.text();
+}
+
+boot();
+</script>
+</body>
+</html>
